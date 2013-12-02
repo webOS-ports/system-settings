@@ -26,6 +26,9 @@ if(cmake_build_type_lower MATCHES coverage)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g" )
 endif()
 
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g" )
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g" )
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -fno-permissive -pedantic -Wall -Wextra")
 find_package(Qt5Widgets REQUIRED)
@@ -35,9 +38,6 @@ set(CMAKE_AUTOMOC ON)
 
 pkg_search_module(GLIB REQUIRED glib-2.0)
 pkg_check_modules(GIO REQUIRED gio-2.0 gio-unix-2.0)
-
-find_program(XGETTEXT_BIN xgettext)
-find_program(MSGFMT_BIN msgfmt)
 
 set(PLUGIN_MANIFEST_DIR_BASE share/ubuntu/settings/system)
 set(PLUGIN_MODULE_DIR_BASE ubuntu-system-settings)
@@ -49,12 +49,7 @@ set(PLUGIN_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/${LIBDIR}/${PLUGIN_MODULE_DIR_BAS
 set(PLUGIN_QML_DIR "${CMAKE_INSTALL_PREFIX}/${PLUGIN_QML_DIR_BASE}")
 set(PLUGIN_PRIVATE_MODULE_DIR "${CMAKE_INSTALL_PREFIX}/${LIBDIR}/${PLUGIN_PRIVATE_MODULE_DIR_BASE}")
 
-add_subdirectory(po)
-add_subdirectory(lib)
-include_directories(lib)
-add_subdirectory(plugins)
 add_subdirectory(src)
-add_subdirectory(tests)
 
 if(cmake_build_type_lower MATCHES coverage)
   ENABLE_COVERAGE_REPORT(TARGETS system-settings FILTER /usr/include ${CMAKE_SOURCE_DIR}/test/* ${CMAKE_BINARY_DIR}/*)

@@ -19,8 +19,6 @@
  */
 
 #include "debug.h"
-#include "i18n.h"
-#include "plugin-manager.h"
 #include "utils.h"
 
 #include <QGuiApplication>
@@ -29,33 +27,13 @@
 #include <QUrl>
 #include <QQuickView>
 #include <QtQml>
+#include <QQmlApplicationEngine>
 
 using namespace SystemSettings;
 
 int main(int argc, char **argv)
 {
     QGuiApplication app(argc, argv);
-
-    /* The testability driver is only loaded by QApplication but not by
-     * QGuiApplication.  However, QApplication depends on QWidget which would
-     * add some unneeded overhead => Let's load the testability driver on our
-     * own.
-     */
-    if (app.arguments().contains(QStringLiteral("-testability"))) {
-        QLibrary testLib(QStringLiteral("qttestability"));
-        if (testLib.load()) {
-            typedef void (*TasInitialize)(void);
-            TasInitialize initFunction =
-                (TasInitialize)testLib.resolve("qt_testability_init");
-            if (initFunction) {
-                initFunction();
-            } else {
-                qCritical("Library qttestability resolve failed!");
-            }
-        } else {
-            qCritical("Library qttestability load failed!");
-        }
-    }
 
     /* read environment variables */
     QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
@@ -67,10 +45,6 @@ int main(int argc, char **argv)
             setLoggingLevel(value);
     }
 
-    initTr(I18N_DOMAIN, NULL);
-    /* HACK: force the theme until lp #1098578 is fixed */
-    QIcon::setThemeName("ubuntu-mobile");
-
     /* Parse the commandline options to see if we've been given a panel to load,
      * and other options for the panel.
      */
@@ -78,18 +52,13 @@ int main(int argc, char **argv)
     QVariantMap pluginOptions;
     parsePluginOptions(app.arguments(), defaultPlugin, pluginOptions);
 
-    QQuickView view;
-    QObject::connect(view.engine(), SIGNAL(quit()), &app, SLOT(quit()),
+    QQmlApplicationEngine engine;
+    QObject::connect(&engine, SIGNAL(quit()), &app, SLOT(quit()),
                      Qt::QueuedConnection);
     qmlRegisterType<QAbstractItemModel>();
-    qmlRegisterType<SystemSettings::PluginManager>("SystemSettings", 1, 0, "PluginManager");
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.engine()->addImportPath(PLUGIN_PRIVATE_MODULE_DIR);
-    view.engine()->addImportPath(PLUGIN_QML_DIR);
-    view.rootContext()->setContextProperty("defaultPlugin", defaultPlugin);
-    view.rootContext()->setContextProperty("pluginOptions", pluginOptions);
-    view.setSource(QUrl("qrc:/qml/MainWindow.qml"));
-    view.show();
+    engine.rootContext()->setContextProperty("defaultPlugin", defaultPlugin);
+    engine.rootContext()->setContextProperty("pluginOptions", pluginOptions);
+    engine.load (QUrl("qrc:///qml/MainWindow.qml"));
 
     return app.exec();
 }

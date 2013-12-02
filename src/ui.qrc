@@ -1,8 +1,8 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>qml/CategoryGrid.qml</file>
-    <file>qml/EntryComponent.qml</file>
-    <file>qml/MainWindow.qml</file>
-    <file>qml/UncategorizedItemsView.qml</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>qml/MainWindow.qml</file>
+        <file>qml/PortsHeader.qml</file>
+        <file>qml/icon.png</file>
+        <file>qml/images/bg.png</file>
+    </qresource>
 </RCC>
